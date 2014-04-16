@@ -13,9 +13,10 @@ Couple of scripts to migrate windows shares from one server to another
 
 ===! Please, be sure to use SetACL specific to your architecture.
 
-===! ALSO you would need some advanced notepad like "Notepad++".
+===! ALSO you would need some advanced notepad like "Notepad++". You could get it here: http://notepad-plus-plus.org/
 
-=== Usage
+Usage
+=====
 
 .\shares_backup.vbs - launch on old server (from which shares are going to migrate)
 
@@ -29,7 +30,8 @@ Example: .\shares_copy.cmd \\new-server\d$
 
 .\shares_create.cmd - launch on new server (to which quotas are going to migrate)
 
-=== Manual
+Manual
+======
 
 A) Run shares_backup.vbs on server from which you are willing to move shares. It will generate 5 files:
 
