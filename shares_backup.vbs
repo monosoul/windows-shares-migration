@@ -192,7 +192,7 @@ dircounter = 0
 
 copycommand = "copy /A /Y "
 
-'Создаём папку для хранения флагов существования путей шар (для защиты от каталогов, имеющих более 1 шары)
+'Creating container folder for existence flags of shared folders (protection from folders with more than 1 shares)
 If (Not objFSO.FolderExists(CurrentDirectory & "\flags")) Then
 	oShell.run "cmd /c mkdir """ & CurrentDirectory & "\flags""",0,bWaitOnReturn
 End If
@@ -207,11 +207,11 @@ For Each objItem in colItems
 		objFileOut.Write(vbCrLf)
 		
 		If Not objFSO.FileExists(CurrentDirectory & "\flags\" & objREx.Replace(objItem.Path,"_")) Then
-			'Генерируем shares_copy.cmd
+			'Generating shares_copy.cmd
 			objFileOut2.Write("xcopy /y /k /e /z """ & objItem.Path & "\*"" """ & "%1\" & objRegEx.Replace(objItem.Path,"") & "\*""" & vbCrLf)
 			objFileOut2.Write("if not %errorlevel%==0 exit %errorlevel%" & vbCrLf)
 			
-			'Генерируем own_shares.cmd
+			'Generating own_shares.cmd
 			objFileOut6.Write("echo Taking ownership on " & objItem.Path & " ..." & vbCrLf)
 			objFileOut6.Write("takeown /R /A /D ""Y"" /F """ & objItem.Path & """ > NUL" & vbCrLf)
 			objFileOut6.Write("if not %errorlevel%==0 (" & vbCrLf & "	echo Failed." & vbCrLf & ") else (" & vbCrLf & "	echo Done." & vbCrLf & ")" & vbCrLf)
@@ -219,7 +219,7 @@ For Each objItem in colItems
 			objFileOut6.Write("""%scriptpath%setacl.exe"" -silent -ot file -on """ & objItem.Path & """ -actn ace -ace ""n:S-1-5-18;p:full"" -ace ""n:S-1-5-32-544;p:full""" & vbCrLf)
 			objFileOut6.Write("if not %errorlevel%==0 (" & vbCrLf & "	echo Failed." & vbCrLf & ") else (" & vbCrLf & "	echo Done." & vbCrLf & ")" & vbCrLf)
 			
-			'Бэкапим ACL NTFS для каталогов, которые будем перемещать
+			'Making backup of NTFS ACL for shared folders
 			oShell.Run """" & CurrentDirectory & "\setacl.exe"" -on """ & objItem.Path & """ -ot file -actn list -lst ""f:sddl;w:d,s,o,g"" -bckp """ & CurrentDirectory & "\" & dircounter & ".acl""",0,bWaitOnReturn
 			If (dircounter = 0) Then
 				copycommand = copycommand & """" & CurrentDirectory & "\" & dircounter & ".acl"""
@@ -228,24 +228,24 @@ For Each objItem in colItems
 			End If
 			dircounter = dircounter + 1
 			
-			'Создаём флаг, указывающий, что шара с таким каталогом уже есть в списке
+			'Creating flag for folder which already was processed
 			Set objFlagObj = objFSO.OpenTextFile(CurrentDirectory & "\flags\" & objREx.Replace(objItem.Path,"_"), ForWriting, True)
 			objFlagObj.Close
 		End If
 	
 Next
 
-'Удаляем папку для хранения флагов существования путей шар
+'Removing container folder for flags
 If (objFSO.FolderExists(CurrentDirectory & "\flags")) Then
 	oShell.run "cmd /c rd /s /q """ & CurrentDirectory & "\flags""",0,bWaitOnReturn
 End If
 
-'Склеиваем файлы со списком ACL для каждого из каталогов
+'Merging files with ACL for every shared folder
 copycommand = copycommand & " """ & CurrentDirectory & "\acllist.lca"""
 oShell.run "cmd /c " & copycommand,0,bWaitOnReturn
 oShell.run "cmd /c del /F /Q """ & CurrentDirectory & "\*.acl""",0,bWaitOnReturn
 
-'Меняем кодировку файла со списокм ACL с UCS-2 LE (UTF-16) на UTF-8
+'Changing codepage for file with ACL from UCS-2 LE (UTF-16) to UTF-8
 Set ADODBStream = CreateObject("ADODB.Stream")
 ADODBStream.Type = 2
 ADODBStream.Charset = "UTF-16LE"

@@ -32,7 +32,7 @@ Do Until objFileIn.AtEndOfStream Or ((Len(share_name) > 0) And (Len(share_path) 
 		If (InStr(tmpline, "Path:") = 1) Then share_path = Right(tmpline, Len(tmpline) - Len("Path:"))
 		If (InStr(tmpline, "Desc:") = 1) Then share_desc = Right(tmpline, Len(tmpline) - Len("Desc:"))
 	End If
-Loop ' Считали все три параметра для создания общей папки - создаем
+Loop 'Read all parameters for share creation, creating share
 
 If ((Len(share_name) > 0) And (Len(share_path) > 0) And (Len(share_desc) > 0)) Then
 
@@ -43,7 +43,7 @@ If ((Len(share_name) > 0) And (Len(share_path) > 0) And (Len(share_desc) > 0)) T
 	errReturn = objNewShare.Create (share_path, share_name, FILE_SHARE, MAXIMUM_CONNECTIONS, share_desc)
 
 	If errReturn = 0 Then
-		' Создали общую папку, чистим дефолтные доступы
+		'Created share, removing default trustees
 		WSHShell.Run """" & CurrentDirectory & "\setacl.exe"" -ot shr -on """ & share_name & """ -actn trustee -trst ""n1:""ВСЕ"";ta:remtrst""", 1, True
 		WSHShell.Run """" & CurrentDirectory & "\setacl.exe"" -ot shr -on """ & share_name & """ -actn trustee -trst ""n1:""EVERYONE"";ta:remtrst""", 1, True
 
@@ -56,7 +56,7 @@ If ((Len(share_name) > 0) And (Len(share_path) > 0) And (Len(share_desc) > 0)) T
 					If (InStr(tmpline, "Trustee:") = 1) Then trustee = Right(tmpline, Len(tmpline) - Len("Trustee:"))
 					If (InStr(tmpline, "Right:") = 1) Then perm = Right(tmpline, Len(tmpline) - Len("Right:"))
 				End If
-			Loop ' Считали группу доступа и уровень доступа - применяем
+			Loop 'Read trustee and rights, applying
 
 			If ((Len(trustee) > 0) And (Len(perm) > 0)) Then
 				If (InStr(UCase(trustee), "BUILTIN\") = 1) Then trustee = Right(trustee, Len(trustee) - Len("BUILTIN\"))
