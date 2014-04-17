@@ -158,6 +158,7 @@ On Error Resume Next
 
 Set oShell = CreateObject("WScript.Shell")
 SysDrive=oShell.ExpandEnvironmentStrings("%SystemDrive%")
+ProcArch=oShell.ExpandEnvironmentStrings("%processor_architecture%")
 Set objFSO = CreateObject("Scripting.FileSystemObject")
 CurrentDirectory = objFSO.GetAbsolutePathName(".")
 Set objFolder = objFSO.CreateFolder(CurrentDirectory & "\")
@@ -179,14 +180,22 @@ objFileOut2.Write("@echo off" & vbCrLf)
 objFileOut2.Write("chcp 1251" & vbCrLf)
 objFileOut3.Write("@echo off" & vbCrLf)
 objFileOut3.Write("set scriptpath=%~dp0" & vbCrLf)
+objFileOut3.Write(vbCrLf & "IF %processor_architecture% == x86 (" & vbCrLf & "set setacl=SetACL32.exe" & vbCrLf & ") ELSE (" & vbCrLf & "set setacl=SetACL64.exe" & vbCrLf & ")" & vbCrLf & vbCrLf)
 objFileOut6.Write("@echo off" & vbCrLf)
 objFileOut6.Write("chcp 1251" & vbCrLf)
 objFileOut6.Write("set scriptpath=%~dp0" & vbCrLf)
+objFileOut6.Write(vbCrLf & "IF %processor_architecture% == x86 (" & vbCrLf & "set setacl=SetACL32.exe" & vbCrLf & ") ELSE (" & vbCrLf & "set setacl=SetACL64.exe" & vbCrLf & ")" & vbCrLf & vbCrLf)
 
 Dim strComputer : strComputer = "."
 Dim objWMI : Set objWMI = GetObject("winmgmts:\\" & strComputer & "\root\CIMV2")
 Dim colItems : Set colItems = objWMI.ExecQuery("SELECT * FROM Win32_Share WHERE Type='0'", "WQL", WBEM_RETURN_IMMEDIATELY + WBEM_FORWARD_ONLY)
 Dim objItem
+
+If (ProcArch = "x86") Then
+	setacl = "SetACL32.exe"
+Else
+	setacl = "SetACL64.exe"
+End If
 
 dircounter = 0
 
@@ -216,11 +225,11 @@ For Each objItem in colItems
 			objFileOut6.Write("takeown /R /A /D ""Y"" /F """ & objItem.Path & """ > NUL" & vbCrLf)
 			objFileOut6.Write("if not %errorlevel%==0 (" & vbCrLf & "	echo Failed." & vbCrLf & ") else (" & vbCrLf & "	echo Done." & vbCrLf & ")" & vbCrLf)
 			objFileOut6.Write("echo Adding Administrators and SYSTEM to ACL on " & objItem.Path & " ..." & vbCrLf)
-			objFileOut6.Write("""%scriptpath%setacl.exe"" -silent -ot file -on """ & objItem.Path & """ -actn ace -ace ""n:S-1-5-18;p:full"" -ace ""n:S-1-5-32-544;p:full""" & vbCrLf)
+			objFileOut6.Write("""%scriptpath%%setacl%"" -silent -ot file -on """ & objItem.Path & """ -actn ace -ace ""n:S-1-5-18;p:full"" -ace ""n:S-1-5-32-544;p:full""" & vbCrLf)
 			objFileOut6.Write("if not %errorlevel%==0 (" & vbCrLf & "	echo Failed." & vbCrLf & ") else (" & vbCrLf & "	echo Done." & vbCrLf & ")" & vbCrLf)
 			
 			'Making backup of NTFS ACL for shared folders
-			oShell.Run """" & CurrentDirectory & "\setacl.exe"" -on """ & objItem.Path & """ -ot file -actn list -lst ""f:sddl;w:d,s,o,g"" -bckp """ & CurrentDirectory & "\" & dircounter & ".acl""",0,bWaitOnReturn
+			oShell.Run """" & CurrentDirectory & "\" & setacl & """ -on """ & objItem.Path & """ -ot file -actn list -lst ""f:sddl;w:d,s,o,g"" -bckp """ & CurrentDirectory & "\" & dircounter & ".acl""",0,bWaitOnReturn
 			If (dircounter = 0) Then
 				copycommand = copycommand & """" & CurrentDirectory & "\" & dircounter & ".acl"""
 			Else
@@ -260,7 +269,7 @@ ADODBStream.SaveToFile CurrentDirectory & "\acllist.lca", 2
 ADODBStream.Close()
 
 objFileOut3.Write("cscript.exe ""%scriptpath%shares_restore.vbs""" & vbCrLf)
-objFileOut3.Write("""%scriptpath%setacl.exe"" -ignoreerr -on ""%SystemDrive%"" -ot file -actn restore -bckp ""%scriptpath%acllist.lca""" & vbCrLf)
+objFileOut3.Write("""%scriptpath%%setacl%"" -ignoreerr -on ""%SystemDrive%"" -ot file -actn restore -bckp ""%scriptpath%acllist.lca""" & vbCrLf)
 objFileOut.Close
 objFileOut2.Close
 objFileOut3.Close

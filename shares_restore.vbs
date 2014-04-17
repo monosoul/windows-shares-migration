@@ -7,11 +7,18 @@ Const MAXIMUM_CONNECTIONS = 4294967295
 On Error Resume Next
 Set oShell = CreateObject("WScript.Shell")
 SysDrive=oShell.ExpandEnvironmentStrings("%SystemDrive%")
+ProcArch=oShell.ExpandEnvironmentStrings("%processor_architecture%")
 Set WSHShell = CreateObject("WScript.Shell")
 Set objFSO = CreateObject("Scripting.FileSystemObject")
 Set objFileIn = objFSO.OpenTextFile(CurrentDirectory & "\shares.txt", ForReading)
 CurrentDirectory = objFSO.GetAbsolutePathName(".")
 Set colDrives = objFSO.Drives
+
+If (ProcArch = "x86") Then
+	setacl = "SetACL32.exe"
+Else
+	setacl = "SetACL64.exe"
+End If
 
 Do Until objFileIn.AtEndOfStream
 	ProcessShare()
@@ -44,8 +51,8 @@ If ((Len(share_name) > 0) And (Len(share_path) > 0) And (Len(share_desc) > 0)) T
 
 	If errReturn = 0 Then
 		'Created share, removing default trustees
-		WSHShell.Run """" & CurrentDirectory & "\setacl.exe"" -ot shr -on """ & share_name & """ -actn trustee -trst ""n1:""ВСЕ"";ta:remtrst""", 1, True
-		WSHShell.Run """" & CurrentDirectory & "\setacl.exe"" -ot shr -on """ & share_name & """ -actn trustee -trst ""n1:""EVERYONE"";ta:remtrst""", 1, True
+		WSHShell.Run """" & CurrentDirectory & "\" & setacl & """ -ot shr -on """ & share_name & """ -actn trustee -trst ""n1:""ВСЕ"";ta:remtrst""", 1, True
+		WSHShell.Run """" & CurrentDirectory & "\" & setacl & """ -ot shr -on """ & share_name & """ -actn trustee -trst ""n1:""EVERYONE"";ta:remtrst""", 1, True
 
 		Do
 			trustee = ""
@@ -64,7 +71,7 @@ If ((Len(share_name) > 0) And (Len(share_path) > 0) And (Len(share_desc) > 0)) T
 				If (perm = "ReadAndExecute") Then perm = "read"
 				If (perm = "Modify") Then perm = "change"
 				WScript.Echo trustee & " - " & perm 
-				WSHShell.Run """" & CurrentDirectory & "\setacl.exe"" -ot shr -on """ & share_name & """ -actn ace -ace ""n:" & trustee & ";p:" & perm & ";m:set""", 1, True
+				WSHShell.Run """" & CurrentDirectory & "\" & setacl & """ -ot shr -on """ & share_name & """ -actn ace -ace ""n:" & trustee & ";p:" & perm & ";m:set""", 1, True
 			End If
 		Loop Until (Len(tmpline) < 2) Or objFileIn.AtEndOfStream
 	Else
