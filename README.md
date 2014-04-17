@@ -3,15 +3,16 @@ windows-shares-migration
 
 Couple of scripts to migrate windows shares from one server to another
 
-===! ATTENTION: for this script to work correctly setacl.exe is needed
+===! ATTENTION: for this script to work correctly SetACL is needed
 
 ===! It is awesome tool by Helge Klein.
 
 ===! You could get it here: http://helgeklein.com/setacl/ .
 
-===! Place it to the same folder with those scripts.
+===! Download executables for 32-bit and 64-bit architectures and
+place them into the same folder with those scripts.
 
-===! Please, be sure to use SetACL specific to your architecture.
+===! You should name them like this: SetACL32.exe and SetACL64.exe
 
 ===! ALSO you would need some advanced notepad like "Notepad++". You could get it here: http://notepad-plus-plus.org/
 
