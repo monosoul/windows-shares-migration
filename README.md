@@ -23,13 +23,13 @@ Usage
 
 .\shares_restore.vbs - would be launched on new server during shares_create.cmd execution
 
-.\own_shares.cmd - launch on old server (from which quotas are going to migrate) to take
+.\own_shares.cmd - launch on old server (from which shares are going to migrate) to take
 ownership on shared folders before copying/moving them
 
-.\shares_copy.cmd - launch on old server (from which quotas are going to migrate). 
+.\shares_copy.cmd - launch on old server (from which shares are going to migrate). 
 Example: .\shares_copy.cmd \\new-server\d$
 
-.\shares_create.cmd - launch on new server (to which quotas are going to migrate)
+.\shares_create.cmd - launch on new server (to which shares are going to migrate)
 
 Manual
 ======
