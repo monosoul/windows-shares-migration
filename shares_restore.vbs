@@ -10,8 +10,8 @@ SysDrive=oShell.ExpandEnvironmentStrings("%SystemDrive%")
 ProcArch=oShell.ExpandEnvironmentStrings("%processor_architecture%")
 Set WSHShell = CreateObject("WScript.Shell")
 Set objFSO = CreateObject("Scripting.FileSystemObject")
-Set objFileIn = objFSO.OpenTextFile(CurrentDirectory & "\shares.txt", ForReading)
 CurrentDirectory = objFSO.GetAbsolutePathName(".")
+Set objFileIn = objFSO.OpenTextFile(CurrentDirectory & "\shares.txt", ForReading)
 Set colDrives = objFSO.Drives
 
 If (ProcArch = "x86") Then
