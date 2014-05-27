@@ -10,7 +10,9 @@ SysDrive=oShell.ExpandEnvironmentStrings("%SystemDrive%")
 ProcArch=oShell.ExpandEnvironmentStrings("%processor_architecture%")
 Set WSHShell = CreateObject("WScript.Shell")
 Set objFSO = CreateObject("Scripting.FileSystemObject")
-CurrentDirectory = objFSO.GetAbsolutePathName(".")
+PathToScript = Wscript.ScriptFullName
+Set ScriptFile = objFSO.GetFile(PathToScript)
+CurrentDirectory = objFSO.GetParentFolderName(ScriptFile)
 Set objFileIn = objFSO.OpenTextFile(CurrentDirectory & "\shares.txt", ForReading)
 Set colDrives = objFSO.Drives
 
