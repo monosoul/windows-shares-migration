@@ -227,7 +227,7 @@ For Each objItem in colItems
 			objFileOut6.Write("takeown /R /A /D ""Y"" /F """ & objItem.Path & """ > NUL" & vbCrLf)
 			objFileOut6.Write("if not %errorlevel%==0 (" & vbCrLf & "	echo Failed." & vbCrLf & ") else (" & vbCrLf & "	echo Done." & vbCrLf & ")" & vbCrLf)
 			objFileOut6.Write("echo Adding Administrators and SYSTEM to ACL on " & objItem.Path & " ..." & vbCrLf)
-			objFileOut6.Write("""%scriptpath%%setacl%"" -silent -ot file -on """ & objItem.Path & """ -actn ace -ace ""n:S-1-5-18;p:full"" -ace ""n:S-1-5-32-544;p:full""" & vbCrLf)
+			objFileOut6.Write("""%scriptpath%%setacl%"" -silent -ot file -on """ & objItem.Path & """ -rec cont_obj -actn ace -ace ""n:S-1-5-18;p:full"" -ace ""n:S-1-5-32-544;p:full""" & vbCrLf)
 			objFileOut6.Write("if not %errorlevel%==0 (" & vbCrLf & "	echo Failed." & vbCrLf & ") else (" & vbCrLf & "	echo Done." & vbCrLf & ")" & vbCrLf)
 			
 			'Making backup of NTFS ACL for shared folders
